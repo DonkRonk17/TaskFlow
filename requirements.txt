@@ -1,0 +1,5 @@
+# TaskFlow - Smart CLI Todo & Project Manager
+# No external dependencies required!
+
+# Optional: For enhanced clipboard support (if you add that feature later)
+# pyperclip>=1.8.0
