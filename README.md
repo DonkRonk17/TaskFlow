@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/3044c665-1fb7-4b41-a745-7e64bce3ada1" />
+
 # 📋 TaskFlow - Smart CLI Todo & Project Manager
 
 **Simple. Fast. Git-friendly.**
@@ -473,6 +475,9 @@ TaskFlow uses visual indicators for quick scanning:
 **A:** The `.taskflow.json` file is your backup. Copy it, commit to Git, or sync with cloud storage (Dropbox, OneDrive, etc.).
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/e79a6f58-e00b-416a-a153-3813725bcfc5" />
+
 
 ## 🤝 Contributing
 
