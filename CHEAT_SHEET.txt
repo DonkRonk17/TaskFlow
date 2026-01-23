@@ -1,0 +1,336 @@
+================================================================================
+TASKFLOW CHEAT SHEET
+Smart CLI Todo & Project Manager
+================================================================================
+
+QUICK START
+-----------
+1. Navigate to project:  cd ~/my-project
+2. Initialize:           python taskflow.py init
+3. Add first task:       python taskflow.py add "My first task"
+4. View tasks:           python taskflow.py list
+
+================================================================================
+COMMANDS OVERVIEW
+================================================================================
+
+COMMAND          DESCRIPTION                            SHORTHAND
+-------          -----------                            ---------
+init             Initialize TaskFlow in directory       tf init
+add              Add new task                           tf add "title"
+list             List/filter tasks                      tf list
+start            Mark task as in progress               tf start <id>
+done             Mark task as completed                 tf done <id>
+block            Mark task as blocked                   tf block <id>
+edit             Edit task properties                   tf edit <id>
+delete           Delete task                            tf delete <id>
+export           Export to Markdown                     tf export
+stats            Show statistics                        tf stats
+
+================================================================================
+ADD TASK OPTIONS
+================================================================================
+
+Basic:
+  taskflow add "Task title"
+
+With priority:
+  taskflow add "Title" --priority high
+  taskflow add "Title" --priority medium   (default)
+  taskflow add "Title" --priority low
+
+With tags (comma-separated):
+  taskflow add "Title" --tags bug,urgent,auth
+
+With due date (ISO format):
+  taskflow add "Title" --due 2026-01-31
+
+Full example:
+  taskflow add "Fix login bug" --priority high --tags bug,auth --due 2026-01-25
+
+================================================================================
+LIST & FILTER OPTIONS
+================================================================================
+
+List all:
+  taskflow list
+
+Filter by status:
+  taskflow list --status todo
+  taskflow list --status in_progress
+  taskflow list --status done
+  taskflow list --status blocked
+
+Filter by priority:
+  taskflow list --priority high
+  taskflow list --priority medium
+  taskflow list --priority low
+
+Filter by tag:
+  taskflow list --tag bug
+  taskflow list --tag sprint-1
+
+Show detailed info:
+  taskflow list --details
+
+Combine filters:
+  taskflow list --status todo --priority high
+  taskflow list --tag bug --details
+
+================================================================================
+STATUS WORKFLOW
+================================================================================
+
+Task lifecycle:
+
+  todo  ------>  in_progress  ------>  done
+          |           |
+          v           v
+       blocked     blocked
+
+Commands:
+  taskflow add "Task"        # Creates in "todo" status
+  taskflow start <id>        # Changes to "in_progress"
+  taskflow done <id>         # Changes to "done"
+  taskflow block <id>        # Changes to "blocked"
+
+Unblock a task:
+  taskflow start <id>        # Changes blocked -> in_progress
+
+================================================================================
+STATUS ICONS
+================================================================================
+
+Status icons (in output):
+  [ ]  = Todo (not started)
+  [>]  = In Progress (working on it)
+  [X]  = Done (completed)
+  [#]  = Blocked (waiting on something)
+
+Priority icons:
+  [!]  = High priority (urgent)
+  [~]  = Medium priority (normal)
+  [-]  = Low priority (when time permits)
+
+Special indicators:
+  [!] OVERDUE = Task is past due date
+
+================================================================================
+EDIT TASK OPTIONS
+================================================================================
+
+Change title:
+  taskflow edit <id> --title "New title"
+
+Change priority:
+  taskflow edit <id> --priority high
+
+Update tags:
+  taskflow edit <id> --tags new,tags,here
+
+Update due date:
+  taskflow edit <id> --due 2026-02-15
+
+Multiple updates:
+  taskflow edit <id> --title "New title" --priority high --tags a,b
+
+================================================================================
+EXPORT OPTIONS
+================================================================================
+
+Default export (TASKS.md):
+  taskflow export
+
+Custom filename:
+  taskflow export --output TODO.md
+  taskflow export --output SPRINT_1.md
+
+Generated file includes:
+  - Task list grouped by status
+  - Priority indicators
+  - Tags and due dates
+  - Creation dates
+  - Total task count
+
+================================================================================
+STATISTICS
+================================================================================
+
+View stats:
+  taskflow stats
+
+Shows:
+  - Total task count
+  - Breakdown by status (todo, in_progress, blocked, done)
+  - Breakdown by priority (high, medium, low)
+  - Percentage for each category
+  - Overdue task count (if any)
+
+================================================================================
+PYTHON API
+================================================================================
+
+Import:
+  from taskflow import TaskFlow
+
+Initialize:
+  tf = TaskFlow()                    # Uses .taskflow.json
+  tf = TaskFlow("custom.json")       # Custom file
+
+Add task:
+  task = tf.add_task("Title")
+  task = tf.add_task("Title", priority="high")
+  task = tf.add_task("Title", priority="medium", tags=["a", "b"])
+  task = tf.add_task("Title", due_date="2026-01-31")
+
+Get task:
+  task = tf.get_task(task_id)
+
+List tasks:
+  tasks = tf.list_tasks()
+  tasks = tf.list_tasks(status="todo")
+  tasks = tf.list_tasks(priority="high")
+  tasks = tf.list_tasks(tag="bug")
+
+Update task:
+  tf.update_task(task_id, title="New title")
+  tf.update_task(task_id, priority="high")
+  tf.update_task(task_id, tags=["new", "tags"])
+
+Status changes:
+  tf.mark_in_progress(task_id)
+  tf.mark_done(task_id)
+  tf.update_task(task_id, status="blocked")
+
+Check overdue:
+  if tf.is_overdue(task):
+      print("Overdue!")
+
+Delete task:
+  tf.delete_task(task_id)
+
+Export:
+  tf.export_markdown()               # TASKS.md
+  tf.export_markdown("custom.md")    # Custom file
+
+================================================================================
+DATA FILE FORMAT
+================================================================================
+
+Location: .taskflow.json (in project directory)
+
+Structure:
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Task title",
+      "priority": "high|medium|low",
+      "status": "todo|in_progress|done|blocked",
+      "tags": ["tag1", "tag2"],
+      "due_date": "2026-01-31",
+      "created": "2026-01-22T10:00:00",
+      "updated": "2026-01-22T14:30:00"
+    }
+  ],
+  "last_updated": "2026-01-22T14:30:00"
+}
+
+================================================================================
+ALIAS SETUP (Optional)
+================================================================================
+
+Bash/Zsh (~/.bashrc or ~/.zshrc):
+  alias tf='python /path/to/taskflow.py'
+
+PowerShell ($PROFILE):
+  function tf { python C:\path\to\taskflow.py $args }
+
+Then use:
+  tf add "Quick task"
+  tf list
+  tf done 3
+
+================================================================================
+COMMON WORKFLOWS
+================================================================================
+
+Morning routine:
+  tf list --status in_progress    # What am I working on?
+  tf list --status blocked        # Any blockers?
+  tf stats                        # Overall progress
+
+Sprint planning:
+  tf add "Task" --tags sprint-1   # Add sprint tasks
+  tf list --tag sprint-1          # View sprint
+  tf export --output SPRINT.md    # Share with team
+
+Bug tracking:
+  tf add "Bug desc" --priority high --tags bug
+  tf list --tag bug
+  tf start <id>
+  tf done <id>
+
+Daily standup:
+  tf list --status done           # Yesterday completed
+  tf list --status in_progress    # Today working on
+  tf list --status blocked        # Blockers
+
+================================================================================
+GIT INTEGRATION
+================================================================================
+
+Track tasks in Git:
+  git add .taskflow.json
+  git commit -m "Update tasks"
+
+Personal tasks (not tracked):
+  echo ".taskflow.json" >> .gitignore
+
+Team tasks (tracked):
+  # Don't add to .gitignore
+  # Team members see same tasks after pull
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+"Task not found":
+  - Check task ID with: taskflow list
+  - IDs are integers, not strings
+
+"No tasks found":
+  - Initialize first: taskflow init
+  - Check you're in right directory
+  - Filters may be too restrictive
+
+"Could not load tasks":
+  - Check .taskflow.json is valid JSON
+  - Check file permissions
+
+"Unicode errors" (Windows):
+  - v1.1.0 uses ASCII output, should work
+  - If issues: check console encoding
+
+================================================================================
+RESOURCES
+================================================================================
+
+Documentation:    AutoProjects/TaskFlow/README.md
+Examples:         AutoProjects/TaskFlow/EXAMPLES.md
+Integration:      AutoProjects/TaskFlow/INTEGRATION_PLAN.md
+Agent Guides:     AutoProjects/TaskFlow/QUICK_START_GUIDES.md
+GitHub:           https://github.com/DonkRonk17/TaskFlow
+Issues:           https://github.com/DonkRonk17/TaskFlow/issues
+
+================================================================================
+VERSION INFO
+================================================================================
+
+Version: 1.1.0
+Updated: January 2026
+Author: Atlas (Team Brain)
+License: MIT
+Dependencies: None (Python stdlib only)
+
+================================================================================

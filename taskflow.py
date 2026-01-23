@@ -20,15 +20,15 @@ if sys.stdout.encoding != 'utf-8':
 # --- Config ---
 TASKFILE = ".taskflow.json"
 PRIORITY_COLORS = {
-    "high": "🔴",
-    "medium": "🟡",
-    "low": "🟢"
+    "high": "[!]",
+    "medium": "[~]",
+    "low": "[-]"
 }
 STATUS_ICONS = {
-    "todo": "⬜",
-    "in_progress": "🔄",
-    "done": "✅",
-    "blocked": "🚫"
+    "todo": "[ ]",
+    "in_progress": "[>]",
+    "done": "[X]",
+    "blocked": "[#]"
 }
 
 class TaskFlow:
@@ -47,7 +47,7 @@ class TaskFlow:
                     data = json.load(f)
                     self.tasks = data.get('tasks', [])
             except Exception as e:
-                print(f"⚠️  Warning: Could not load tasks: {e}")
+                print(f"[!] Warning: Could not load tasks: {e}")
                 self.tasks = []
         else:
             self.tasks = []
@@ -62,7 +62,7 @@ class TaskFlow:
             with open(self.task_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error saving tasks: {e}")
+            print(f"[X] Error saving tasks: {e}")
     
     def add_task(self, title: str, priority: str = "medium", tags: List[str] = None, due_date: str = None):
         """Add new task"""
@@ -191,7 +191,7 @@ class TaskFlow:
                 f.write(''.join(output))
             return True
         except Exception as e:
-            print(f"❌ Error exporting: {e}")
+            print(f"[X] Error exporting: {e}")
             return False
 
 
@@ -206,7 +206,7 @@ def print_task(task: Dict, show_details: bool = False):
         try:
             due = datetime.fromisoformat(task['due_date'])
             if datetime.now() > due and task['status'] != 'done':
-                overdue_marker = " ⚠️  OVERDUE"
+                overdue_marker = " [!] OVERDUE"
         except:
             pass
     
@@ -305,29 +305,29 @@ Priorities: high, medium, low
     # Execute command
     if args.command == 'init':
         if Path(TASKFILE).exists():
-            print("✅ TaskFlow already initialized in this directory")
+            print("[OK] TaskFlow already initialized in this directory")
         else:
             tf.save_tasks()
-            print("✅ TaskFlow initialized!")
+            print("[OK] TaskFlow initialized!")
             print(f"   Task file: {TASKFILE}")
-            print("\n💡 Quick start:")
+            print("\n[TIP] Quick start:")
             print('   taskflow add "My first task"')
             print('   taskflow list')
     
     elif args.command == 'add':
         tags = args.tags.split(',') if args.tags else []
         task = tf.add_task(args.title, args.priority, tags, args.due)
-        print(f"✅ Task added: [{task['id']}] {task['title']}")
+        print(f"[OK] Task added: [{task['id']}] {task['title']}")
     
     elif args.command == 'list':
         tasks = tf.list_tasks(args.status, args.priority, args.tag)
         
         if not tasks:
-            print("📭 No tasks found")
+            print("[INFO] No tasks found")
             return
         
         # Print summary
-        print(f"\n📋 TaskFlow - {len(tasks)} task(s)\n")
+        print(f"\n[TASKS] TaskFlow - {len(tasks)} task(s)\n")
         
         for task in tasks:
             print_task(task, args.details)
@@ -339,7 +339,7 @@ Priorities: high, medium, low
             status = task['status']
             status_counts[status] = status_counts.get(status, 0) + 1
         
-        print("📊 Summary:")
+        print("[STATS] Summary:")
         for status in ["todo", "in_progress", "blocked", "done"]:
             count = status_counts.get(status, 0)
             if count > 0:
@@ -350,31 +350,31 @@ Priorities: high, medium, low
     elif args.command == 'done':
         if tf.mark_done(args.task_id):
             task = tf.get_task(args.task_id)
-            print(f"✅ Task completed: [{task['id']}] {task['title']}")
+            print(f"[OK] Task completed: [{task['id']}] {task['title']}")
         else:
-            print(f"❌ Task {args.task_id} not found")
+            print(f"[X] Task {args.task_id} not found")
     
     elif args.command == 'start':
         if tf.mark_in_progress(args.task_id):
             task = tf.get_task(args.task_id)
-            print(f"🔄 Task started: [{task['id']}] {task['title']}")
+            print(f"[>] Task started: [{task['id']}] {task['title']}")
         else:
-            print(f"❌ Task {args.task_id} not found")
+            print(f"[X] Task {args.task_id} not found")
     
     elif args.command == 'block':
         if tf.update_task(args.task_id, status="blocked"):
             task = tf.get_task(args.task_id)
-            print(f"🚫 Task blocked: [{task['id']}] {task['title']}")
+            print(f"[#] Task blocked: [{task['id']}] {task['title']}")
         else:
-            print(f"❌ Task {args.task_id} not found")
+            print(f"[X] Task {args.task_id} not found")
     
     elif args.command == 'delete':
         task = tf.get_task(args.task_id)
         if task:
             if tf.delete_task(args.task_id):
-                print(f"🗑️  Task deleted: [{task['id']}] {task['title']}")
+                print(f"[DEL] Task deleted: [{task['id']}] {task['title']}")
         else:
-            print(f"❌ Task {args.task_id} not found")
+            print(f"[X] Task {args.task_id} not found")
     
     elif args.command == 'edit':
         task = tf.get_task(args.task_id)
@@ -394,20 +394,20 @@ Priorities: high, medium, low
         
         if updates:
             tf.update_task(args.task_id, **updates)
-            print(f"✏️  Task updated: [{task['id']}] {task['title']}")
+            print(f"[EDIT] Task updated: [{task['id']}] {task['title']}")
         else:
-            print("⚠️  No changes specified")
+            print("[!] No changes specified")
     
     elif args.command == 'export':
         if tf.export_markdown(args.output):
-            print(f"✅ Tasks exported to: {args.output}")
+            print(f"[OK] Tasks exported to: {args.output}")
         else:
-            print("❌ Export failed")
+            print("[X] Export failed")
     
     elif args.command == 'stats':
         total = len(tf.tasks)
         if total == 0:
-            print("📭 No tasks yet")
+            print("[INFO] No tasks yet")
             return
         
         # Calculate stats
@@ -423,7 +423,7 @@ Priorities: high, medium, low
             if tf.is_overdue(task):
                 overdue_count += 1
         
-        print("\n📊 TaskFlow Statistics\n")
+        print("\n[STATS] TaskFlow Statistics\n")
         print(f"Total Tasks: {total}")
         print()
         
@@ -444,7 +444,7 @@ Priorities: high, medium, low
         
         if overdue_count > 0:
             print()
-            print(f"⚠️  Overdue: {overdue_count}")
+            print(f"[!] Overdue: {overdue_count}")
         
         print()
 
@@ -453,7 +453,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n👋 TaskFlow closed")
+        print("\n\n[BYE] TaskFlow closed")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n[X] Error: {e}")
         sys.exit(1)
